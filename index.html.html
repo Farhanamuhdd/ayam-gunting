@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Ayam Gunting — Cash Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#FFF1F6;
+    --bg-panel:#FFFFFF;
+    --bg-card:#FFE2EF;
+    --accent-primary:#FF5FA2;
+    --accent-primary-dim:#FFC4DE;
+    --accent-mint:#33D6A6;
+    --accent-mint-dim:#BFF3E2;
+    --text-dark:#5A2A45;
+    --text-muted:#BD8AA5;
+    --line-dotted:#F6CBE0;
+    --danger:#FF7A9E;
+    --cashout:#E85D82;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg-deep);}
+  body{
+    font-family:'Nunito',system-ui,sans-serif;
+    color:var(--text-dark);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+  }
+  .app{
+    width:100%;
+    max-width:440px;
+    min-height:100vh;
+    background:var(--bg-deep);
+    padding-bottom:40px;
+    position:relative;
+  }
+  /* Header */
+  .header{
+    padding:30px 20px 22px;
+    background:radial-gradient(120% 100% at 50% 0%, #FFE0EE 0%, var(--bg-deep) 72%);
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .header:before{
+    content:'♡ ♡ ♡';
+    position:absolute;
+    top:6px; left:0; right:0;
+    text-align:center;
+    letter-spacing:14px;
+    font-size:11px;
+    color:var(--accent-primary-dim);
+  }
+  .eyebrow{
+    font-family:'Nunito',sans-serif;
+    font-weight:800;
+    font-size:11px;
+    letter-spacing:3px;
+    color:var(--accent-primary);
+    text-transform:uppercase;
+    margin-bottom:6px;
+    margin-top:10px;
+  }
+  .brand{
+    font-family:'Baloo 2',sans-serif;
+    font-size:23px;
+    font-weight:700;
+    letter-spacing:0.2px;
+    color:var(--text-dark);
+  }
+  .brand span{color:var(--accent-primary);}
+  .cash-figure{
+    font-family:'Baloo 2',sans-serif;
+    font-size:50px;
+    font-weight:800;
+    color:var(--accent-primary);
+    margin:16px 0 2px;
+    letter-spacing:-1px;
+    line-height:1;
+  }
+  .cash-label{
+    font-size:12px;
+    color:var(--text-muted);
+    text-transform:uppercase;
+    letter-spacing:2px;
+    font-weight:700;
+  }
+
+  .withdraw-card{
+    margin-top:16px;
+    background:linear-gradient(135deg, #FFFFFF, #FFF6FA);
+    border:1.5px solid var(--accent-mint-dim);
+    border-radius:18px;
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    text-align:left;
+    box-shadow:0 4px 14px rgba(255,95,162,0.08);
+  }
+  .withdraw-card .piggy{
+    font-size:28px;
+    flex-shrink:0;
+  }
+  .withdraw-card .wd-text{flex:1;}
+  .withdraw-card .wd-label{
+    font-size:10px;
+    color:var(--text-muted);
+    text-transform:uppercase;
+    letter-spacing:1px;
+    font-weight:800;
+  }
+  .withdraw-card .wd-amount{
+    font-family:'Baloo 2',sans-serif;
+    font-size:22px;
+    font-weight:700;
+    color:var(--accent-mint);
+    line-height:1.3;
+  }
+  .withdraw-card .wd-hint{
+    font-size:10.5px;
+    color:var(--text-muted);
+    margin-top:2px;
+    line-height:1.4;
+  }
+
+  .target-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:18px;
+    font-family:'Nunito',sans-serif;
+    font-weight:700;
+    font-size:11px;
+    color:var(--text-muted);
+  }
+  .target-bar-track{
+    height:8px;
+    background:var(--bg-card);
+    border-radius:6px;
+    margin-top:8px;
+    overflow:hidden;
+  }
+  .target-bar-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--accent-primary), var(--accent-mint));
+    border-radius:6px;
+    transition:width 0.5s ease;
+  }
+  .target-pips{
+    display:flex;
+    justify-content:space-between;
+    margin-top:6px;
+    font-size:10px;
+    color:var(--text-muted);
+    font-weight:700;
+  }
+  .target-pip.hit{color:var(--accent-primary);}
+
+  /* perforation divider */
+  .tear{
+    position:relative;
+    height:1px;
+    margin:22px 0 0;
+    border-top:2.5px dotted var(--line-dotted);
+  }
+  .tear:before, .tear:after{
+    content:'';
+    position:absolute;
+    top:-8px;
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:var(--bg-deep);
+  }
+  .tear:before{left:-28px;}
+  .tear:after{right:-28px;}
+
+  /* Quick add */
+  .section{padding:22px 20px 0;}
+  .section-title{
+    font-family:'Baloo 2',sans-serif;
+    font-size:14px;
+    letter-spacing:0.5px;
+    color:var(--text-dark);
+    margin-bottom:12px;
+    font-weight:700;
+  }
+  .type-toggle{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .type-btn{
+    flex:1;
+    padding:10px 6px;
+    border-radius:12px;
+    border:1.5px solid var(--line-dotted);
+    background:var(--bg-panel);
+    color:var(--text-muted);
+    font-family:'Nunito',sans-serif;
+    font-weight:800;
+    font-size:13px;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .type-btn.active{
+    background:var(--accent-primary);
+    border-color:var(--accent-primary);
+    color:#fff;
+  }
+  .type-btn.active.expense{background:#FF8FAE;border-color:#FF8FAE;}
+  .type-btn.active.cashin{background:var(--accent-mint);border-color:var(--accent-mint);}
+  .type-btn.active.cashout{background:var(--cashout);border-color:var(--cashout);}
+
+  .field{margin-bottom:12px;}
+  .field label{
+    display:block;
+    font-size:11px;
+    color:var(--text-muted);
+    margin-bottom:6px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    font-weight:700;
+  }
+  .field input{
+    width:100%;
+    padding:13px 14px;
+    border-radius:12px;
+    border:1.5px solid var(--line-dotted);
+    background:var(--bg-panel);
+    color:var(--text-dark);
+    font-family:'Nunito',sans-serif;
+    font-weight:700;
+    font-size:16px;
+  }
+  .field input#descInput{font-weight:600; font-size:14px;}
+  .field input:focus{outline:none; border-color:var(--accent-primary);}
+  .field input::placeholder{color:#D9AFC5; font-weight:600;}
+
+  .row-2{display:flex; gap:10px;}
+  .row-2 .field{flex:1;}
+
+  .add-btn{
+    width:100%;
+    padding:15px;
+    border-radius:14px;
+    border:none;
+    background:var(--accent-primary);
+    color:#fff;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:0.3px;
+    cursor:pointer;
+    margin-top:4px;
+    transition:transform .1s ease, opacity .15s ease;
+    box-shadow:0 6px 16px rgba(255,95,162,0.28);
+  }
+  .add-btn:active{transform:scale(0.98); opacity:0.9;}
+
+  /* Ledger */
+  .day-group{margin-bottom:4px;}
+  .day-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:14px 0 8px;
+    border-bottom:1.5px dashed var(--line-dotted);
+  }
+  .day-head .date{font-size:12px; color:var(--text-muted); letter-spacing:0.5px; font-weight:800;}
+  .day-head .profit{font-size:13px; font-weight:800;}
+  .day-head .profit.pos{color:var(--accent-mint);}
+  .day-head .profit.neg{color:var(--danger);}
+
+  .tx-row{
+    display:flex;
+    align-items:center;
+    padding:11px 0;
+    border-bottom:1px dotted var(--line-dotted);
+    gap:10px;
+  }
+  .tx-tag{
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    padding:4px 8px;
+    border-radius:20px;
+    white-space:nowrap;
+    font-family:'Nunito',sans-serif;
+  }
+  .tx-tag.sale{background:rgba(255,95,162,0.14); color:var(--accent-primary);}
+  .tx-tag.expense{background:rgba(255,122,158,0.16); color:#E85D82;}
+  .tx-tag.cashin{background:rgba(51,214,166,0.16); color:#1FAF85;}
+  .tx-tag.cashout{background:rgba(232,93,130,0.16); color:var(--cashout);}
+  .tx-desc{
+    flex:1;
+    font-size:13px;
+    color:var(--text-dark);
+    font-weight:600;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .tx-amt{
+    font-family:'Nunito',sans-serif;
+    font-size:14px;
+    font-weight:800;
+    white-space:nowrap;
+  }
+  .tx-amt.pos{color:var(--accent-mint);}
+  .tx-amt.neg{color:var(--danger);}
+  .tx-del{
+    background:none;
+    border:none;
+    color:var(--text-muted);
+    font-size:16px;
+    cursor:pointer;
+    padding:0 2px;
+    line-height:1;
+  }
+
+  .empty-state{
+    text-align:center;
+    padding:30px 10px;
+    color:var(--text-muted);
+    font-size:13px;
+    font-weight:600;
+  }
+
+  .totals-strip{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+  }
+  .total-chip{
+    flex:1;
+    background:var(--bg-panel);
+    border:1.5px solid var(--bg-card);
+    border-radius:14px;
+    padding:12px;
+    text-align:center;
+  }
+  .total-chip .lbl{font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; font-weight:800;}
+  .total-chip .val{font-family:'Baloo 2',sans-serif; font-weight:700; font-size:16px; margin-top:4px;}
+  .total-chip.sales .val{color:var(--accent-primary);}
+  .total-chip.exp .val{color:var(--danger);}
+
+  .footer-note{
+    text-align:center;
+    color:var(--text-muted);
+    font-size:11px;
+    padding:26px 20px 4px;
+    line-height:1.6;
+    font-weight:600;
+  }
+
+  .toast{
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--accent-mint);
+    color:#0D3A2C;
+    font-weight:800;
+    font-size:13px;
+    padding:11px 20px;
+    border-radius:30px;
+    opacity:0;
+    transition:opacity .25s ease, transform .25s ease;
+    pointer-events:none;
+    max-width:90%;
+    text-align:center;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  @keyframes slideIn{
+    from{opacity:0; transform:translateY(-6px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .tx-row.new{animation:slideIn .3s ease;}
+
+  ::-webkit-scrollbar{width:0px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="eyebrow">Business Cash Book</div>
+    <div class="brand">🍗 AYAM <span>GUNTING</span></div>
+    <div class="cash-figure" id="cashFigure">RM 0.00</div>
+    <div class="cash-label">business cash on hand</div>
+
+    <div class="withdraw-card">
+      <div class="piggy">🦢</div>
+      <div class="wd-text">
+        <div class="wd-label">Profit you can take out</div>
+        <div class="wd-amount" id="withdrawAmount">RM 0.00</div>
+        <div class="wd-hint">Safe to pocket — your stock &amp; starting capital stay untouched.</div>
+      </div>
+    </div>
+
+    <div class="target-row">
+      <span id="targetLabel">Next target: RM100</span>
+      <span id="targetPct">0%</span>
+    </div>
+    <div class="target-bar-track"><div class="target-bar-fill" id="targetBar" style="width:0%"></div></div>
+    <div class="target-pips">
+      <span class="target-pip" id="pip100">RM100</span>
+      <span class="target-pip" id="pip200">RM200</span>
+      <span class="target-pip" id="pip500">RM500</span>
+      <span class="target-pip" id="pip1000">RM1,000</span>
+    </div>
+
+    <div class="totals-strip">
+      <div class="total-chip sales"><div class="lbl">Total Sales</div><div class="val" id="totalSales">RM0</div></div>
+      <div class="total-chip exp"><div class="lbl">Total Expenses</div><div class="val" id="totalExp">RM0</div></div>
+    </div>
+  </div>
+
+  <div class="tear"></div>
+
+  <div class="section">
+    <div class="section-title">✨ Add Entry</div>
+    <div class="type-toggle">
+      <button class="type-btn active" data-type="Sale" onclick="selectType('Sale')">Sale</button>
+      <button class="type-btn" data-type="Expense" onclick="selectType('Expense')">Expense</button>
+      <button class="type-btn" data-type="Cash In" onclick="selectType('Cash In')">Cash In</button>
+      <button class="type-btn" data-type="Cash Out" onclick="selectType('Cash Out')">Cash Out</button>
+    </div>
+    <div class="row-2">
+      <div class="field">
+        <label>Amount (RM)</label>
+        <input type="number" inputmode="decimal" id="amountInput" placeholder="0.00" step="0.01">
+      </div>
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="dateInput">
+      </div>
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <input type="text" id="descInput" placeholder="e.g. 15 portions, or Chicken 2kg">
+    </div>
+    <button class="add-btn" onclick="addEntry()">+ Add Entry</button>
+  </div>
+
+  <div class="tear"></div>
+
+  <div class="section">
+    <div class="section-title">📒 Ledger</div>
+    <div id="ledger"></div>
+  </div>
+
+  <div class="footer-note">
+    Business cash only — keep personal money separate.<br>
+    Everything here is saved automatically on this device.
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'ayam-gunting-transactions';
+let currentType = 'Sale';
+let transactions = [];
+
+const seedTransactions = [
+  {id: 1, date: todayStr(new Date('2026-08-17')), type: 'Sale', desc: 'Ayam Gunting - 11 portions x RM8', amount: 88},
+  {id: 2, date: todayStr(new Date('2026-08-17')), type: 'Expense', desc: 'Chicken 2kg x RM16', amount: 32},
+  {id: 3, date: todayStr(new Date('2026-08-17')), type: 'Expense', desc: 'Tepung ubi', amount: 6},
+];
+const OPENING_CASH = 41; // so Day 1 ends at RM91 as calculated
+
+function todayStr(d){
+  const dt = d || new Date();
+  return dt.toISOString().slice(0,10);
+}
+
+function selectType(t){
+  currentType = t;
+  document.querySelectorAll('.type-btn').forEach(b=>{
+    b.classList.remove('active','expense','cashin','cashout');
+  });
+  const btn = document.querySelector(`.type-btn[data-type="${t}"]`);
+  btn.classList.add('active');
+  if(t==='Expense') btn.classList.add('expense');
+  if(t==='Cash In') btn.classList.add('cashin');
+  if(t==='Cash Out') btn.classList.add('cashout');
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+async function loadData(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      transactions = JSON.parse(raw);
+    } else {
+      transactions = seedTransactions.slice();
+      await saveData();
+    }
+  }catch(e){
+    transactions = seedTransactions.slice();
+  }
+  render();
+}
+
+async function saveData(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+  }catch(e){
+    console.error('Save failed', e);
+    showToast('⚠ Could not save on this device');
+  }
+}
+
+async function addEntry(){
+  const amountEl = document.getElementById('amountInput');
+  const dateEl = document.getElementById('dateInput');
+  const descEl = document.getElementById('descInput');
+
+  const amount = parseFloat(amountEl.value);
+  const date = dateEl.value || todayStr();
+  const desc = descEl.value.trim() || currentType;
+
+  if(!amount || amount <= 0){
+    showToast('Enter an amount first');
+    amountEl.focus();
+    return;
+  }
+
+  const entry = {
+    id: Date.now(),
+    date: date,
+    type: currentType,
+    desc: desc,
+    amount: amount
+  };
+  transactions.push(entry);
+  await saveData();
+  render(entry.id);
+
+  amountEl.value = '';
+  descEl.value = '';
+  showToast(`Added: ${currentType} RM${amount.toFixed(2)} 🎀`);
+}
+
+async function deleteEntry(id){
+  transactions = transactions.filter(t => t.id !== id);
+  await saveData();
+  render();
+}
+
+function render(newId){
+  // Totals
+  let totalSales = 0, totalExp = 0, cashIn = 0, cashOut = 0;
+  transactions.forEach(t=>{
+    if(t.type === 'Sale') totalSales += t.amount;
+    else if(t.type === 'Expense') totalExp += t.amount;
+    else if(t.type === 'Cash In') cashIn += t.amount;
+    else if(t.type === 'Cash Out') cashOut += t.amount;
+  });
+  const profit = totalSales - totalExp;
+  const cash = OPENING_CASH + profit + cashIn - cashOut;
+
+  // Profit you can safely withdraw: lifetime profit, minus what you've
+  // already taken out as "Cash Out", capped so it never exceeds cash on hand
+  // and never goes negative.
+  const withdrawable = Math.max(0, Math.min(cash, profit - cashOut));
+
+  document.getElementById('cashFigure').textContent = `RM ${cash.toFixed(2)}`;
+  document.getElementById('withdrawAmount').textContent = `RM ${withdrawable.toFixed(2)}`;
+  document.getElementById('totalSales').textContent = `RM${totalSales.toFixed(2)}`;
+  document.getElementById('totalExp').textContent = `RM${totalExp.toFixed(2)}`;
+
+  // Targets
+  const targets = [100, 200, 500, 1000];
+  let nextTarget = targets.find(t => cash < t);
+  const pipsIds = {100:'pip100',200:'pip200',500:'pip500',1000:'pip1000'};
+  targets.forEach(t=>{
+    const el = document.getElementById(pipsIds[t]);
+    el.classList.toggle('hit', cash >= t);
+  });
+  if(nextTarget){
+    const prevTarget = targets[targets.indexOf(nextTarget)-1] || 0;
+    const pct = Math.max(0, Math.min(100, ((cash-prevTarget)/(nextTarget-prevTarget))*100));
+    document.getElementById('targetLabel').textContent = `Next target: RM${nextTarget}`;
+    document.getElementById('targetPct').textContent = `${Math.round(pct)}%`;
+    document.getElementById('targetBar').style.width = pct + '%';
+  } else {
+    document.getElementById('targetLabel').textContent = `🎉 All targets hit!`;
+    document.getElementById('targetPct').textContent = `100%`;
+    document.getElementById('targetBar').style.width = '100%';
+  }
+
+  // Ledger grouped by date, newest first
+  const ledgerEl = document.getElementById('ledger');
+  ledgerEl.innerHTML = '';
+
+  if(transactions.length === 0){
+    ledgerEl.innerHTML = '<div class="empty-state">No entries yet. Add your first sale or expense above 🌸</div>';
+    return;
+  }
+
+  const byDate = {};
+  transactions.forEach(t=>{
+    if(!byDate[t.date]) byDate[t.date] = [];
+    byDate[t.date].push(t);
+  });
+  const dates = Object.keys(byDate).sort().reverse();
+
+  const tagClass = {'Sale':'sale','Expense':'expense','Cash In':'cashin','Cash Out':'cashout'};
+  const isPositive = {'Sale':true,'Expense':false,'Cash In':true,'Cash Out':false};
+
+  dates.forEach(date=>{
+    const entries = byDate[date];
+    let dayProfit = 0;
+    entries.forEach(t=>{
+      dayProfit += isPositive[t.type] ? t.amount : -t.amount;
+    });
+
+    const dateObj = new Date(date + 'T00:00:00');
+    const dateLabel = dateObj.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'day-group';
+
+    const head = document.createElement('div');
+    head.className = 'day-head';
+    head.innerHTML = `<span class="date">${dateLabel}</span><span class="profit ${dayProfit>=0?'pos':'neg'}">${dayProfit>=0?'+':''}RM${dayProfit.toFixed(2)}</span>`;
+    groupDiv.appendChild(head);
+
+    entries.slice().reverse().forEach(t=>{
+      const row = document.createElement('div');
+      row.className = 'tx-row' + (t.id === newId ? ' new' : '');
+      const pos = isPositive[t.type];
+      row.innerHTML = `
+        <span class="tx-tag ${tagClass[t.type]}">${t.type}</span>
+        <span class="tx-desc">${escapeHtml(t.desc)}</span>
+        <span class="tx-amt ${pos?'pos':'neg'}">${pos?'+':'-'}RM${t.amount.toFixed(2)}</span>
+        <button class="tx-del" onclick="deleteEntry(${t.id})">✕</button>
+      `;
+      groupDiv.appendChild(row);
+    });
+
+    ledgerEl.appendChild(groupDiv);
+  });
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// init
+document.getElementById('dateInput').value = todayStr();
+loadData();
+</script>
+
+</body>
+</html>
